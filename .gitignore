@@ -1,0 +1,44 @@
+# IDE Settings
+.idea/
+.vscode/
+*.iml
+.DS_Store
+.settings/
+.classpath
+.project
+
+# Build Output
+target/
+bin/
+logs/
+*.log
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+.env
+.py
+
+# Sensitive/Internal Data (Do NOT upload to public repo)
+RAG_CHUNKED/
+RAG_SOURCE/
+기획자료/
+*.doc
+*.docx
+*.xls
+*.xlsx
+*.ppt
+*.pptx
+*.hwPx
+*.show
+*.hwp
+*.pdf
+*.zip
+*.tar.gz
+*.csv
+
+# Secrets (Optional, check if you have local configurations)
+# src/main/resources/application.properties
+

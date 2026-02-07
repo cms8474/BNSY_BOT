@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bnsy.bot.mapper.ChatMapper">
+
+    <resultMap id="ChatResultMap" type="com.bnsy.bot.dto.ChatDTO">
+        <id property="logId" column="LOG_ID"/>
+        <result property="memberId" column="MEMBER_ID"/>
+        <result property="question" column="QUESTION" jdbcType="CLOB" javaType="java.lang.String"/>
+        <result property="answer" column="ANSWER" jdbcType="CLOB" javaType="java.lang.String"/>
+        <result property="chatDt" column="CHAT_DT"/>
+    </resultMap>
+
+    <!-- 채팅 저장 -->
+    <insert id="insertChat" parameterType="com.bnsy.bot.dto.ChatDTO">
+        <selectKey keyProperty="logId" resultType="long" order="BEFORE">
+            SELECT SEQ_CHAT_HISTORY_ID.NEXTVAL FROM DUAL
+        </selectKey>
+        
+        INSERT INTO CHAT_HISTORY (
+            LOG_ID,
+            MEMBER_ID,
+            QUESTION,
+            ANSWER,
+            CHAT_DT
+        ) VALUES (
+            #{logId},
+            #{memberId, jdbcType=VARCHAR},
+            #{question, jdbcType=CLOB},
+            #{answer, jdbcType=CLOB},
+            SYSDATE
+        )
+    </insert>
+
+    <!-- 사용자별 채팅 이력 조회 -->
+    <select id="selectChatHistoryByMemberId" parameterType="String" resultMap="ChatResultMap">
+        SELECT 
+            LOG_ID,
+            MEMBER_ID,
+            QUESTION,
+            ANSWER,
+            CHAT_DT
+        FROM CHAT_HISTORY
+        WHERE MEMBER_ID = #{memberId}
+        ORDER BY LOG_ID ASC 
+    </select>
+
+    <!-- 채팅 이력 전체 삭제 -->
+    <delete id="deleteChatHistoryByMemberId" parameterType="String">
+        DELETE FROM CHAT_HISTORY WHERE MEMBER_ID = #{memberId}
+    </delete>
+
+</mapper>

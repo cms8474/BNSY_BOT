@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bnsy.bot.mapper.DashboardMapper">
+
+    <resultMap id="MetricResultMap" type="com.bnsy.bot.dto.ServerMetricDTO">
+        <id property="metricId" column="METRIC_ID"/>
+        <result property="serverIp" column="SERVER_IP"/>
+        <result property="cpuUsage" column="CPU_USAGE"/>
+        <result property="memUsage" column="MEM_USAGE"/>
+        <result property="gpuUsage" column="GPU_USAGE"/>
+        <result property="rpm" column="RPM"/>
+        <result property="latency" column="LATENCY"/>
+        <result property="status" column="STATUS"/>
+        <result property="logDt" column="LOG_DT"/>
+    </resultMap>
+
+    <!-- 최근 메트릭 조회 -->
+    <select id="selectRecentMetrics" parameterType="int" resultMap="MetricResultMap">
+        SELECT * FROM (
+            SELECT 
+                METRIC_ID, SERVER_IP, CPU_USAGE, MEM_USAGE, GPU_USAGE, 
+                RPM, LATENCY, STATUS, LOG_DT
+            FROM SERVER_METRIC
+            ORDER BY LOG_DT DESC
+        )
+        WHERE ROWNUM &lt;= #{limit}
+        ORDER BY LOG_DT ASC
+    </select>
+
+    <!-- 메트릭 저장 -->
+    <insert id="insertMetric" parameterType="com.bnsy.bot.dto.ServerMetricDTO">
+        INSERT INTO SERVER_METRIC (
+            SERVER_IP, CPU_USAGE, MEM_USAGE, GPU_USAGE, RPM, LATENCY, STATUS, LOG_DT
+        ) VALUES (
+            #{serverIp}, #{cpuUsage}, #{memUsage}, #{gpuUsage}, #{rpm}, #{latency}, #{status}, SYSTIMESTAMP
+        )
+    </insert>
+
+    <!-- 대화 이력 조회 -->
+    <select id="selectChatLogs" resultType="com.bnsy.bot.dto.ChatDTO">
+        SELECT 
+            LOG_ID as logId,
+            MEMBER_ID as memberId,
+            QUESTION as question,
+            ANSWER as answer,
+            CHAT_DT as chatDt
+        FROM CHAT_HISTORY
+        WHERE 1=1
+        <choose>
+            <when test='period == "1h"'>
+                AND CHAT_DT >= SYSDATE - 1/24
+            </when>
+            <when test='period == "1d"'>
+                AND CHAT_DT >= SYSDATE - 1
+            </when>
+            <when test='period == "1w"'>
+                AND CHAT_DT >= SYSDATE - 7
+            </when>
+            <otherwise>
+                <if test="startDate != null and startDate != ''">
+                    AND CHAT_DT &gt;= TO_DATE(#{startDate}, 'YYYY-MM-DD')
+                </if>
+                <if test="endDate != null and endDate != ''">
+                    AND CHAT_DT &lt; TO_DATE(#{endDate}, 'YYYY-MM-DD') + 1
+                </if>
+            </otherwise>
+        </choose>
+        ORDER BY LOG_ID DESC
+    </select>
+
+</mapper>

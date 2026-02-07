@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bnsy.bot.mapper.MemberMapper">
+
+    <!-- ResultMap: MEMBERS 테이블과 MemberDTO 매핑 -->
+    <resultMap id="MemberResultMap" type="com.bnsy.bot.dto.MemberDTO">
+        <id property="memberId" column="MEMBER_ID"/>
+        <result property="memberPw" column="MEMBER_PW"/>
+        <result property="memberName" column="MEMBER_NAME"/>
+        <result property="role" column="ROLE"/>
+        <result property="joinDt" column="JOIN_DT"/>
+    </resultMap>
+
+    <!-- 회원 조회 -->
+    <select id="findById" parameterType="String" resultMap="MemberResultMap">
+        SELECT MEMBER_ID, MEMBER_PW, MEMBER_NAME, ROLE, JOIN_DT
+        FROM MEMBERS
+        WHERE MEMBER_ID = #{memberId}
+    </select>
+
+    <!-- 로그인 체크 -->
+    <select id="checkLogin" resultMap="MemberResultMap">
+        SELECT MEMBER_ID, MEMBER_PW, MEMBER_NAME, ROLE, JOIN_DT
+        FROM MEMBERS
+        WHERE MEMBER_ID = #{memberId}
+          AND MEMBER_PW = #{memberPw}
+    </select>
+
+    <!-- 회원가입 -->
+    <insert id="insertMember" parameterType="com.bnsy.bot.dto.MemberDTO">
+        INSERT INTO MEMBERS (
+            MEMBER_ID,
+            MEMBER_PW,
+            MEMBER_NAME,
+            ROLE,
+            JOIN_DT
+        ) VALUES (
+            #{memberId, jdbcType=VARCHAR},
+            #{memberPw, jdbcType=VARCHAR},
+            #{memberName, jdbcType=VARCHAR},
+            NVL(#{role, jdbcType=VARCHAR}, 'USER'),
+            SYSDATE
+        )
+    </insert>
+
+    <!-- 회원정보 수정 -->
+    <update id="updateMember" parameterType="com.bnsy.bot.dto.MemberDTO">
+        UPDATE MEMBERS
+        SET
+            MEMBER_PW = #{memberPw, jdbcType=VARCHAR},
+            MEMBER_NAME = #{memberName, jdbcType=VARCHAR},
+            ROLE = #{role, jdbcType=VARCHAR}
+        WHERE MEMBER_ID = #{memberId, jdbcType=VARCHAR}
+    </update>
+
+    <!-- 회원 삭제 -->
+    <delete id="deleteMember" parameterType="String">
+        DELETE FROM MEMBERS
+        WHERE MEMBER_ID = #{memberId}
+    </delete>
+
+</mapper>
